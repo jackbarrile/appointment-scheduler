@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 public class MemberDoesNotExistException extends AppointmentSchedulerException {
 
     public MemberDoesNotExistException(String errorMessage) {
-        super(errorMessage, HttpStatus.BAD_REQUEST);
+        super(errorMessage, HttpStatus.NOT_FOUND);
     }
 }

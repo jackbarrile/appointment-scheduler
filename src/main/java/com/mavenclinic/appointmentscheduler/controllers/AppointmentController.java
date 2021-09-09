@@ -7,7 +7,6 @@ import com.mavenclinic.appointmentscheduler.exceptions.MemberDoesNotExistExcepti
 import com.mavenclinic.appointmentscheduler.models.Appointment;
 import lombok.Setter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -40,8 +39,9 @@ public class AppointmentController {
         return newAppointment;
     }
 
-    @GetMapping("/{userId}")
-    public List<Appointment> getMemberAppointments(@PathVariable Integer userId) {
+    @GetMapping("/")
+    public List<Appointment> getMemberAppointments(Integer userId) {
+        verifyUserExists(userId);
         return memberAppointmentList.get(userId);
     }
 
@@ -56,12 +56,9 @@ public class AppointmentController {
     }
 
     private void validateAppointment(Integer userId, Appointment newAppointment) {
-        Set<LocalDate> memberAppointmentDates = memberAppointmentDateList.get(userId);
+        verifyUserExists(userId);
 
-        if (memberAppointmentDates == null) {
-            throw new MemberDoesNotExistException(String.format("Invalid request: User ID provided (%d) not found",
-                    userId));
-        }
+        Set<LocalDate> memberAppointmentDates = memberAppointmentDateList.get(userId);
 
         if (!memberAppointmentDates.isEmpty()) {
             if (memberAppointmentDates.contains(newAppointment.getAppointmentDate())) {
@@ -78,6 +75,15 @@ public class AppointmentController {
                     "provided (%s) is not on the hour or half-hour", newAppointment.getAppointmentStartTime()));
         }
 
+    }
+
+    private void verifyUserExists(Integer userId) {
+        Set<LocalDate> memberAppointmentDates = memberAppointmentDateList.get(userId);
+
+        if (memberAppointmentDates == null) {
+            throw new MemberDoesNotExistException(String.format("Invalid request: User ID provided (%d) not found",
+                    userId));
+        }
     }
 
     private void saveMemberAppointment(Integer userId, Appointment newAppointment) {

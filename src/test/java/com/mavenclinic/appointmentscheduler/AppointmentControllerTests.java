@@ -131,7 +131,7 @@ public class AppointmentControllerTests {
         } catch (MemberDoesNotExistException e) {
             Assertions.assertEquals(String.format("Invalid request: User ID provided (%d) not found", userId),
                     e.getMessage());
-            Assertions.assertEquals(HttpStatus.BAD_REQUEST, e.getErrorCode());
+            Assertions.assertEquals(HttpStatus.NOT_FOUND, e.getErrorCode());
         }
     }
 
@@ -171,12 +171,17 @@ public class AppointmentControllerTests {
     }
 
     @Test
-    public void GetMemberAppointmentWithInvalidParametersThrows400() {
-
-    }
-
-    @Test
     public void GetMemberAppointmentWithNonExistentUserIdThrows404() {
+        Integer userId = 5;
+
+        try {
+            appointmentController.getMemberAppointments(userId);;
+            Assertions.fail();
+        } catch (MemberDoesNotExistException e) {
+            Assertions.assertEquals(String.format("Invalid request: User ID provided (%d) not found", userId),
+                    e.getMessage());
+            Assertions.assertEquals(HttpStatus.NOT_FOUND, e.getErrorCode());
+        }
     }
 
 
