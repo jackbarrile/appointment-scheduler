@@ -3,6 +3,7 @@ package com.mavenclinic.appointmentscheduler;
 import com.mavenclinic.appointmentscheduler.controllers.AppointmentController;
 import com.mavenclinic.appointmentscheduler.exceptions.AppointmentExistsException;
 import com.mavenclinic.appointmentscheduler.exceptions.InvalidAppointmentParametersException;
+import com.mavenclinic.appointmentscheduler.exceptions.MemberDoesNotExistException;
 import com.mavenclinic.appointmentscheduler.models.Appointment;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,11 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
+import java.util.*;
 
 @SpringBootTest
 public class AppointmentControllerTests {
@@ -26,8 +28,24 @@ public class AppointmentControllerTests {
 
     @BeforeEach
     public void setup() {
-        appointmentController.setMemberAppointmentList(new HashMap<>());
-        appointmentController.setMemberAppointmentDateList(new HashMap<>());
+        Map<Integer, List<Appointment>> memberAppointmentList = new HashMap<>();
+        Map<Integer, Set<LocalDate>> memberAppointmentDateList = new HashMap<>();
+
+        LocalDateTime dateAndStartTimeOfFirstMemberAppointment = LocalDateTime.now();
+        Appointment firstMemberAppointment = new Appointment(dateAndStartTimeOfFirstMemberAppointment.toLocalDate(),
+                dateAndStartTimeOfFirstMemberAppointment.toLocalTime(),
+                dateAndStartTimeOfFirstMemberAppointment.toLocalTime().plusMinutes(30));
+
+        List<Appointment> firstMemberAppointmentList = new ArrayList<>();
+        firstMemberAppointmentList.add(firstMemberAppointment);
+        Set<LocalDate> firstMemberAppointmentStartDates =
+                new HashSet<>(List.of(dateAndStartTimeOfFirstMemberAppointment.toLocalDate()));
+
+        memberAppointmentList.put(1, firstMemberAppointmentList);
+        memberAppointmentDateList.put(1, firstMemberAppointmentStartDates);
+
+        appointmentController.setMemberAppointmentList(memberAppointmentList);
+        appointmentController.setMemberAppointmentDateList(memberAppointmentDateList);
     }
 
     @Test
@@ -92,7 +110,8 @@ public class AppointmentControllerTests {
             appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
             Assertions.fail();
         } catch (InvalidAppointmentParametersException e) {
-            Assertions.assertEquals("Text '2021-29-09 19:30' could not be parsed at index 16", e.getMessage());
+            Assertions.assertEquals("Invalid request: DateTime format provided does not match expectation " +
+                    "(yyyy-dd-MM HH:mm:ss)", e.getMessage());
             Assertions.assertEquals(HttpStatus.BAD_REQUEST, e.getErrorCode());
         }
 
@@ -100,7 +119,18 @@ public class AppointmentControllerTests {
 
     @Test
     public void CreateMemberAppointmentWithNonExistentUserIdThrows404() {
+        Integer userId = 5;
+        LocalDateTime dateAndStartTimeOfAppointment = LocalDateTime.of(2021,
+                Month.SEPTEMBER, 29, 19, 30, 40);
+        String formattedDateAndStartTimeOfAppointment = dateAndStartTimeOfAppointment.format(FORMATTER);
 
+        try {
+            appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
+            Assertions.fail();
+        } catch (MemberDoesNotExistException e) {
+            Assertions.assertEquals("Invalid request: User ID provided (5) not found", e.getMessage());
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, e.getErrorCode());
+        }
     }
 
     @Test
