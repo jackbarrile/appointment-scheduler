@@ -8,9 +8,7 @@ import com.mavenclinic.appointmentscheduler.models.Appointment;
 import lombok.Setter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,8 +18,8 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Setter
-@RestController("/appointment")
-@Validated
+@RestController
+@RequestMapping("/appointment")
 public class AppointmentController {
 
     private Map<Integer, List<Appointment>> memberAppointmentList = new HashMap<>();
@@ -40,6 +38,11 @@ public class AppointmentController {
         saveMemberAppointment(userId, newAppointment);
 
         return newAppointment;
+    }
+
+    @GetMapping("/{userId}")
+    public List<Appointment> getMemberAppointments(@PathVariable Integer userId) {
+        return memberAppointmentList.get(userId);
     }
 
     private LocalDateTime deserializeFormattedDateAndTimeOfAppointment(String formattedDateAndTimeOfAppointment) {

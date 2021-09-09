@@ -31,7 +31,8 @@ public class AppointmentControllerTests {
         Map<Integer, List<Appointment>> memberAppointmentList = new HashMap<>();
         Map<Integer, Set<LocalDate>> memberAppointmentDateList = new HashMap<>();
 
-        LocalDateTime dateAndStartTimeOfFirstMemberAppointment = LocalDateTime.now();
+        LocalDateTime dateAndStartTimeOfFirstMemberAppointment = LocalDateTime.of(2021,
+                Month.APRIL, 29, 19, 30, 40);
         Appointment firstMemberAppointment = new Appointment(dateAndStartTimeOfFirstMemberAppointment.toLocalDate(),
                 dateAndStartTimeOfFirstMemberAppointment.toLocalTime(),
                 dateAndStartTimeOfFirstMemberAppointment.toLocalTime().plusMinutes(30));
@@ -154,7 +155,19 @@ public class AppointmentControllerTests {
 
     @Test
     public void GetMemberAppointmentsReturnsAllMemberAppointmentDetails() {
+        Integer userId = 1;
 
+        List<Appointment> memberAppointments = appointmentController.getMemberAppointments(userId);
+
+        LocalDateTime expectedDateAndStartTimeOfMemberAppointment = LocalDateTime.of(2021,
+                Month.APRIL, 29, 19, 30, 40);
+        Appointment expectedAppointment = new Appointment(expectedDateAndStartTimeOfMemberAppointment.toLocalDate(),
+                expectedDateAndStartTimeOfMemberAppointment.toLocalTime(),
+                expectedDateAndStartTimeOfMemberAppointment.toLocalTime().plusMinutes(30));
+        Appointment actualAppointment = memberAppointments.get(0);
+
+        Assertions.assertEquals(1, memberAppointments.size());
+        Assertions.assertEquals(expectedAppointment, actualAppointment);
     }
 
     @Test
