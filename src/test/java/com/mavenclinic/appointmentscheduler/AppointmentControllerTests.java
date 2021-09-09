@@ -1,18 +1,21 @@
 package com.mavenclinic.appointmentscheduler;
 
 import com.mavenclinic.appointmentscheduler.controllers.AppointmentController;
+import com.mavenclinic.appointmentscheduler.exceptions.AppointmentExistsException;
+import com.mavenclinic.appointmentscheduler.exceptions.InvalidAppointmentParametersException;
 import com.mavenclinic.appointmentscheduler.models.Appointment;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
+import java.util.HashMap;
 
 @SpringBootTest
 public class AppointmentControllerTests {
@@ -20,6 +23,12 @@ public class AppointmentControllerTests {
     @Autowired
     private AppointmentController appointmentController;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-dd-MM HH:mm:ss");
+
+    @BeforeEach
+    public void setup() {
+        appointmentController.setMemberAppointmentList(new HashMap<>());
+        appointmentController.setMemberAppointmentDateList(new HashMap<>());
+    }
 
     @Test
     public void CreateMemberAppointmentReturnsMemberAppointmentDetails() {
@@ -51,10 +60,11 @@ public class AppointmentControllerTests {
 
         try {
             appointmentController.saveAppointment(userId, null);
-        } catch (HttpClientErrorException e) {
-            Assertions.assertTrue(Objects.requireNonNull(e.getMessage()).contains("400"));
+            Assertions.fail();
+        } catch (InvalidAppointmentParametersException e) {
+            Assertions.assertEquals(e.getMessage(), "Invalid request: dateAndStartTimeOfAppointment is null");
+            Assertions.assertEquals(e.getErrorCode(), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @Test
@@ -65,14 +75,35 @@ public class AppointmentControllerTests {
 
         try {
             appointmentController.saveAppointment(null, formattedDateAndStartTimeOfAppointment);
-        } catch (HttpClientErrorException e) {
-            Assertions.assertTrue(Objects.requireNonNull(e.getMessage()).contains("400"));
+            Assertions.fail();
+        } catch (InvalidAppointmentParametersException e) {
+            Assertions.assertEquals(e.getMessage(), "Invalid request: userID is null");
+            Assertions.assertEquals(e.getErrorCode(), HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @Test
     public void CreateMemberAppointmentWhenAnAppointmentExistsOnTheSameDayThrows409() {
+        Integer userId = 1;
+        LocalDateTime dateAndStartTimeOfFirstAppointment = LocalDateTime.of(2021,
+                Month.SEPTEMBER, 29, 19, 30, 40);
+        String formattedDateAndStartTimeOfFirstAppointment = dateAndStartTimeOfFirstAppointment.format(FORMATTER);
+
+        appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfFirstAppointment);
+
+        LocalDateTime dateAndStartTimeOfSecondAppointment = LocalDateTime.of(2021,
+                Month.SEPTEMBER, 29, 17, 30, 25);
+        String formattedDateAndStartTimeOfSecondAppointment = dateAndStartTimeOfSecondAppointment.format(FORMATTER);
+
+        try {
+            appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfSecondAppointment);
+            Assertions.fail();
+        } catch (AppointmentExistsException e) {
+            Assertions.assertEquals(e.getMessage(), String.format("Invalid request: " +
+                            "the provided Member already has an appointment on the provided date %s",
+                    dateAndStartTimeOfSecondAppointment.toLocalDate()));
+            Assertions.assertEquals(e.getErrorCode(), HttpStatus.CONFLICT);
+        }
 
     }
 
