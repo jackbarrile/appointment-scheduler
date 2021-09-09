@@ -38,8 +38,8 @@ public class AppointmentControllerTests {
         String formattedDateAndStartTimeOfAppointment = dateAndStartTimeOfAppointment.format(FORMATTER);
         Appointment appointment = appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
 
-        Assertions.assertEquals(appointment.getAppointmentDate(), dateAndStartTimeOfAppointment.toLocalDate());
-        Assertions.assertEquals(appointment.getAppointmentStartTime(), dateAndStartTimeOfAppointment.toLocalTime());
+        Assertions.assertEquals(dateAndStartTimeOfAppointment.toLocalDate(), appointment.getAppointmentDate());
+        Assertions.assertEquals(dateAndStartTimeOfAppointment.toLocalTime(), appointment.getAppointmentStartTime());
     }
 
     @Test
@@ -51,7 +51,7 @@ public class AppointmentControllerTests {
         Appointment appointment = appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
 
         LocalTime expectedAppointmentEndTime = dateAndStartTimeOfAppointment.toLocalTime().plusMinutes(30);
-        Assertions.assertEquals(appointment.getAppointmentEndTime(), expectedAppointmentEndTime);
+        Assertions.assertEquals(expectedAppointmentEndTime, appointment.getAppointmentEndTime());
     }
 
     @Test
@@ -71,21 +71,35 @@ public class AppointmentControllerTests {
             appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfSecondAppointment);
             Assertions.fail();
         } catch (AppointmentExistsException e) {
-            Assertions.assertEquals(e.getMessage(), String.format("Invalid request: " +
+            Assertions.assertEquals(String.format("Invalid request: " +
                             "the provided Member already has an appointment on the provided date %s",
-                    dateAndStartTimeOfSecondAppointment.toLocalDate()));
-            Assertions.assertEquals(e.getErrorCode(), HttpStatus.CONFLICT);
+                    dateAndStartTimeOfSecondAppointment.toLocalDate()), e.getMessage());
+            Assertions.assertEquals(HttpStatus.CONFLICT, e.getErrorCode());
         }
 
     }
 
     @Test
     public void CreateMemberAppointmentWithInvalidDateTimeFormatThrows400() {
+        DateTimeFormatter badFormat = DateTimeFormatter.ofPattern("yyyy-dd-MM HH:mm");
+
+        Integer userId = 1;
+        LocalDateTime dateAndStartTimeOfAppointment = LocalDateTime.of(2021,
+                Month.SEPTEMBER, 29, 19, 30);
+        String formattedDateAndStartTimeOfAppointment = dateAndStartTimeOfAppointment.format(badFormat);
+
+        try {
+            appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
+            Assertions.fail();
+        } catch (InvalidAppointmentParametersException e) {
+            Assertions.assertEquals("Text '2021-29-09 19:30' could not be parsed at index 16", e.getMessage());
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, e.getErrorCode());
+        }
 
     }
 
     @Test
-    public void CreateMemberAppointmentWithNonExistantUserIdThrows404() {
+    public void CreateMemberAppointmentWithNonExistentUserIdThrows404() {
 
     }
 

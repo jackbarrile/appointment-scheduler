@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Setter
@@ -44,7 +45,12 @@ public class AppointmentController {
     }
 
     private LocalDateTime deserializeFormattedDateAndTimeOfAppointment(String formattedDateAndTimeOfAppointment) {
-        return LocalDateTime.parse(formattedDateAndTimeOfAppointment, FORMATTER);
+        try {
+            return LocalDateTime.parse(formattedDateAndTimeOfAppointment, FORMATTER);
+        } catch (DateTimeParseException ex) {
+            throw new InvalidAppointmentParametersException(ex.getMessage());
+        }
+
     }
 
     private void validateParameters(Integer userId, String dateAndStartTimeOfAppointment) {
