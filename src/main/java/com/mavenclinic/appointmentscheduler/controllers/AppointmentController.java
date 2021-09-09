@@ -87,7 +87,7 @@ public class AppointmentController {
     }
 
     @ExceptionHandler({AppointmentSchedulerException.class})
-    public ResponseEntity<AppointmentSchedulerException> handleInvalidAppointmentParameters(AppointmentSchedulerException ex) {
-        return new ResponseEntity<>(ex, ex.getErrorCode());
+    public ResponseEntity handleInvalidAppointmentParameters(AppointmentSchedulerException ex) {
+        return new ResponseEntity(ex.getMessage(), ex.getErrorCode());
     }
 }

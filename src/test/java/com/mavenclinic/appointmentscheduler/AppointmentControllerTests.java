@@ -55,34 +55,6 @@ public class AppointmentControllerTests {
     }
 
     @Test
-    public void CreateMemberAppointmentWithNullAppointmentStartTimeThrows400() {
-        Integer userId = 1;
-
-        try {
-            appointmentController.saveAppointment(userId, null);
-            Assertions.fail();
-        } catch (InvalidAppointmentParametersException e) {
-            Assertions.assertEquals(e.getMessage(), "Invalid request: dateAndStartTimeOfAppointment is null");
-            Assertions.assertEquals(e.getErrorCode(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Test
-    public void CreateMemberAppointmentWithNullUserIdThrows400() {
-        LocalDateTime dateAndStartTimeOfAppointment = LocalDateTime.of(2021,
-                Month.SEPTEMBER, 29, 19, 30, 40);
-        String formattedDateAndStartTimeOfAppointment = dateAndStartTimeOfAppointment.format(FORMATTER);
-
-        try {
-            appointmentController.saveAppointment(null, formattedDateAndStartTimeOfAppointment);
-            Assertions.fail();
-        } catch (InvalidAppointmentParametersException e) {
-            Assertions.assertEquals(e.getMessage(), "Invalid request: userID is null");
-            Assertions.assertEquals(e.getErrorCode(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Test
     public void CreateMemberAppointmentWhenAnAppointmentExistsOnTheSameDayThrows409() {
         Integer userId = 1;
         LocalDateTime dateAndStartTimeOfFirstAppointment = LocalDateTime.of(2021,
