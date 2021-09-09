@@ -68,6 +68,13 @@ public class AppointmentController {
             }
         }
 
+        int appointmentStartTimeMinute = newAppointment.getAppointmentStartTime().getMinute();
+
+        if (appointmentStartTimeMinute != 0 && appointmentStartTimeMinute != 30) {
+            throw new InvalidAppointmentParametersException(String.format("Invalid request: Appointment start time " +
+                    "provided (%s) is not on the hour or half-hour", newAppointment.getAppointmentStartTime()));
+        }
+
     }
 
     private void saveMemberAppointment(Integer userId, Appointment newAppointment) {

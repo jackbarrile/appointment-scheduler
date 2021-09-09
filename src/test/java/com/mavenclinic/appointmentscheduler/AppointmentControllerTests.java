@@ -128,14 +128,28 @@ public class AppointmentControllerTests {
             appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
             Assertions.fail();
         } catch (MemberDoesNotExistException e) {
-            Assertions.assertEquals("Invalid request: User ID provided (5) not found", e.getMessage());
+            Assertions.assertEquals(String.format("Invalid request: User ID provided (%d) not found", userId),
+                    e.getMessage());
             Assertions.assertEquals(HttpStatus.BAD_REQUEST, e.getErrorCode());
         }
     }
 
     @Test
     public void CreateMemberAppointmentWithDateTimeNotOnTheHourOrHalfHourThrows400() {
+        Integer userId = 1;
+        LocalDateTime dateAndStartTimeOfAppointment = LocalDateTime.of(2021,
+                Month.SEPTEMBER, 29, 19, 45, 40);
+        String formattedDateAndStartTimeOfAppointment = dateAndStartTimeOfAppointment.format(FORMATTER);
 
+        try {
+            appointmentController.saveAppointment(userId, formattedDateAndStartTimeOfAppointment);
+            Assertions.fail();
+        } catch (InvalidAppointmentParametersException e) {
+            Assertions.assertEquals(String.format("Invalid request: Appointment start time provided (%s) is not on the " +
+                            "hour or half-hour", dateAndStartTimeOfAppointment.toLocalTime()),
+                    e.getMessage());
+            Assertions.assertEquals(HttpStatus.BAD_REQUEST, e.getErrorCode());
+        }
     }
 
     @Test
