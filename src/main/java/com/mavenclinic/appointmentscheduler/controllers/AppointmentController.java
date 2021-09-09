@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,11 +21,12 @@ public class AppointmentController {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-dd-MM HH:mm:ss");
 
     @PostMapping("")
-    public Appointment saveAppointment(Integer userId, String formattedDateAndTimeOfAppointment) {
-        LocalDateTime dateAndTimeOfAppointment = 
-                deserializeFormattedDateAndTimeOfAppointment(formattedDateAndTimeOfAppointment);
-        Appointment newAppointment = new Appointment(dateAndTimeOfAppointment.toLocalDate(),
-                dateAndTimeOfAppointment.toLocalTime());
+    public Appointment saveAppointment(Integer userId, String dateAndStartTimeOfAppointment) {
+        LocalDateTime deserializedDateAndStartTimeOfAppointment =
+                deserializeFormattedDateAndTimeOfAppointment(dateAndStartTimeOfAppointment);
+        LocalTime appointmentEndTime = deserializedDateAndStartTimeOfAppointment.toLocalTime().plusMinutes(30);
+        Appointment newAppointment = new Appointment(deserializedDateAndStartTimeOfAppointment.toLocalDate(),
+                deserializedDateAndStartTimeOfAppointment.toLocalTime(), appointmentEndTime);
 
         // todo maybe add this to a method
         List<Appointment> memberAppointments = this.memberAppointments.get(userId);

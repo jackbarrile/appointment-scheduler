@@ -12,5 +12,6 @@ public class Appointment {
 
     private LocalDate appointmentDate;
     private LocalTime appointmentStartTime;
+    private LocalTime appointmentEndTime;
 
 }
