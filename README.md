@@ -70,3 +70,19 @@
 
         - 400 - if invalid parameters are provided
         - 404 - if the Member associated with the userId is not found
+
+## Usage
+
+>Note: the below Docker build commands take a bit of time due to dependency downloads. Given more time, I would have setup a Docker repo to cache the image.
+
+### Running the Application
+
+```bash
+docker build -t springio/gs-spring-boot-docker . # this takes a bit since it needs to download dependencies
+docker run -p 8080:8080 springio/gs-spring-boot-docker
+```
+
+### Running Tests
+
+- Un-comment line 3 in the Dockerfile: `RUN mvn test` and run the same commands to start the container as if running the application
+- Alternatively, if you would just like to run the tests, you may un-comment line 3 in the Dockerfile: `RUN mvn test`, and comment line 6 in the Dockerfile `ENTRYPOINT ["java","-jar","/app.jar"]` and then run the same commands to start the container as if running the application
