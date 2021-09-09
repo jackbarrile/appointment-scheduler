@@ -18,14 +18,13 @@ import java.util.*;
 
 @Setter
 @RestController
-@RequestMapping("/appointment")
 public class AppointmentController {
 
     private Map<Integer, List<Appointment>> memberAppointmentList = new HashMap<>();
     private Map<Integer, Set<LocalDate>> memberAppointmentDateList = new HashMap<>();
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-dd-MM HH:mm:ss");
 
-    @PostMapping("")
+    @PostMapping("/appointment")
     public Appointment saveAppointment(Integer userId, String dateAndStartTimeOfAppointment) {
         LocalDateTime deserializedDateAndStartTimeOfAppointment =
                 deserializeFormattedDateAndTimeOfAppointment(dateAndStartTimeOfAppointment);
@@ -39,7 +38,7 @@ public class AppointmentController {
         return newAppointment;
     }
 
-    @GetMapping("/")
+    @GetMapping("/appointments")
     public List<Appointment> getMemberAppointments(Integer userId) {
         verifyUserExists(userId);
         return memberAppointmentList.get(userId);

@@ -21,7 +21,7 @@
 
 - POST `/appointment`
     - Parameters
-        - Body
+        - Query
             - userId - The Member's unique identifier, in Integer form
             - appointmentStartTime - The requested Appointment's start time, in YYYY-DD-MM HH:MM:SS format
 
@@ -37,10 +37,9 @@
 
             ```json
             {
-            	"appointmentId": 1,
-            	"userId": 1,
-            	"appointmentStartTime": "2021-09-09 12:00:00",
-            	"appointmentEndTime": "2021-09-09 12:30:00"
+                "appointmentDate": "2021-09-29",
+                "appointmentStartTime": "19:30:40",
+                "appointmentEndTime": "20:00:40"
             }
             ```
 
@@ -49,26 +48,24 @@
         - 400 - if the DateTime provided is not on the hour or half-hour
         - 404 - if the Member associated with the userId is not found
         - 409 - if an Appointment already exists on the Date provided
-- GET `/appointment/{userId}`
+- GET `/appointments/`
     - Parameters
-        - Path parameters
+        - Query parameters
             - userId - The Member's unique identifier, in Integer form
     - Responses
         - 200
 
             ```json
-            {
-            	"userId": 1,
-            	"appointments": [
-            		{
-            			"appointmentStartTime": "2021-09-09 12:00:00",
-            			"appointmentEndTime": "2021-09-09 12:30:00"
-            		}
-            	]
-            }
+            [
+                {
+                    "appointmentDate": "2021-09-09",
+                    "appointmentStartTime": "23:10:36.079213",
+                    "appointmentEndTime": "23:40:36.079213"
+                }
+            ]
             ```
 
-        - 400 - if invalid parameters are provided
+
         - 404 - if the Member associated with the userId is not found
 
 ## Usage
@@ -77,12 +74,9 @@
 
 ### Running the Application
 
+> Tests are run prior to building the app
+
 ```bash
 docker build -t springio/gs-spring-boot-docker . # this takes a bit since it needs to download dependencies
 docker run -p 8080:8080 springio/gs-spring-boot-docker
 ```
-
-### Running Tests
-
-- Un-comment line 3 in the Dockerfile: `RUN mvn test` and run the same commands to start the container as if running the application
-- Alternatively, if you would just like to run the tests, you may un-comment line 3 in the Dockerfile: `RUN mvn test`, and comment line 6 in the Dockerfile `ENTRYPOINT ["java","-jar","/app.jar"]` and then run the same commands to start the container as if running the application
